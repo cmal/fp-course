@@ -36,7 +36,7 @@ instance Monad ExactlyOne where
     (a -> ExactlyOne b)
     -> ExactlyOne a
     -> ExactlyOne b
-  (=<<) f (ExactlyOne a) = f a
+  (=<<) = bindExactlyOne
 
 -- | Binds a function on a List.
 --
@@ -58,8 +58,7 @@ instance Monad Optional where
     (a -> Optional b)
     -> Optional a
     -> Optional b
-  (=<<) _ Empty = Empty
-  (=<<) f (Full x) = f x
+  (=<<) = bindOptional
 
 -- | Binds a function on the reader ((->) t).
 --
@@ -70,7 +69,8 @@ instance Monad ((->) t) where
     (a -> ((->) t b))
     -> ((->) t a)
     -> ((->) t b)
-  (=<<) f g = r where r x = f (g x) x
+  (=<<) f g = r where r x = f (g x) x -- bindReader
+
 
 -- | Witness that all things with (=<<) and (<$>) also have (<*>).
 --

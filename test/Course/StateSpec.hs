@@ -68,7 +68,7 @@ spec = do
           let xs' = hlist xs
            in nub xs' == xs'
         Full x -> length (filter (== x) xs) > 1
-    prop "" $ forAllLists $ \xs ->
+    prop "finds repeats" $ forAllLists $ \xs ->
       case firstRepeat xs of
         Empty -> True
         Full x ->
@@ -82,7 +82,7 @@ spec = do
   describe "distinct" $ do
     prop "No repeats after distinct" $
       forAllLists (\xs -> firstRepeat (distinct xs) == Empty)
-    prop "" $
+    prop "No repeats after distinct" $
       forAllLists (\xs -> distinct xs == distinct (flatMap (\x -> x :. x :. Nil) xs))
 
   describe "isHappy" $ do

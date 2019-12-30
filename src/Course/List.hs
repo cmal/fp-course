@@ -285,7 +285,8 @@ find f (x :. y) = if f x
 lengthGT4 ::
   List a
   -> Bool
-lengthGT4 a = length a > 4
+lengthGT4 (_ :. _ :. _ :. _ :. _ :. _) = True
+lengthGT4 _ = False
 
 -- | Reverse a list.
 --
@@ -301,7 +302,12 @@ lengthGT4 a = length a > 4
 reverse ::
   List a
   -> List a
-reverse a = foldLeft (\y x -> x :. y) Nil a
+-- reverse a = foldLeft (\y x -> x :. y) Nil a
+-- reverse = foldLeft (flip (:.)) Nil
+reverse l =  rev l Nil
+  where
+    rev Nil     a = a
+    rev (x:.xs) a = rev xs (x:.a)
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
@@ -315,7 +321,7 @@ produce ::
   (a -> a)
   -> a
   -> List a
-produce f x = x :. produce f (f x)
+produce f x = x :. produce f (f x) -- iterate
 
 -- | Do anything other than reverse a list.
 -- Is it even possible?
