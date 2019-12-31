@@ -222,7 +222,9 @@ distinctF ::
 distinctF la =
   -- error "todo: Course.StateT#distinctF"
   evalT (filtering pred la) S.empty
-    where pred = \a -> StateT $ \s -> if a > 100 then Empty else Full (not $ S.member a s, S.insert a s)
+    where pred = \a -> StateT $ \s -> if a > 100
+                                      then Empty
+                                      else Full (not $ S.member a s, S.insert a s)
 
 -- | An `OptionalT` is a functor of an `Optional` value.
 data OptionalT f a =
@@ -266,17 +268,7 @@ instance Functor f => Functor (OptionalT f) where
 -- [Full 2,Empty,Full 3,Empty]
 instance Monad f => Applicative (OptionalT f) where
   pure a = OptionalT $ return $ Full a
-  -- (<*>) (OptionalT ot1) (OptionalT ot2) = OptionalT $ do
-  --                                                     o1 <- ot1
-  --                                                     o2 <- ot2
-  --                                                     return $ o1 <*> o2
-  (<*>) (OptionalT foab) (OptionalT foa) = OptionalT $ do
-    oab <- foab
-    oa  <- foa
-    let ob = oab <*> oa in onFull (\b -> return $ Full b) ob
-  -- data OptionalT f a =  OptionalT {    runOptionalT ::      f (Optional a)  }
-  -- onFull ::  Applicative f =>  (t -> f (Optional a))  -> Optional t  -> f (Optional a)
-  -- (=<<)  ::  (a -> f b) -> f a -> f b
+  (<*>) = error "StateT#apply"
 
 
 -- | Implement the `Monad` instance for `OptionalT f` given a Monad f.
