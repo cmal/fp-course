@@ -4,9 +4,10 @@
 
 module Course.Comonad where
 
-import Course.Core
+-- import Course.Core
 import Course.ExactlyOne
 import Course.Extend
+import Course.Functor
 
 -- | All instances of the `Comonad` type-class must satisfy two laws. These
 -- laws are not checked by the compiler. These laws are given as:
@@ -16,6 +17,10 @@ import Course.Extend
 --
 -- * The law of right identity
 --   `∀f. copure . (f <<=) == f
+
+
+--   (<<=) ::    (f a -> b)   -> f a    -> f b
+
 class Extend f => Comonad f where
   copure ::
     f a
@@ -30,7 +35,8 @@ instance Comonad ExactlyOne where
     ExactlyOne a
     -> a
   copure =
-    error "todo: Course.Comonad copure#instance ExactlyOne"
+    -- error "todo: Course.Comonad copure#instance ExactlyOne"
+    runExactlyOne
 
 -- | Witness that all things with (<<=) and copure also have (<$>).
 --
@@ -42,4 +48,5 @@ instance Comonad ExactlyOne where
   -> f a
   -> f b
 (<$$>) =
-  error "todo: Course.Comonad#(<$>)"
+  -- error "todo: Course.Comonad#(<$>)"
+  (<$>)
