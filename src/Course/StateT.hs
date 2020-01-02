@@ -101,7 +101,7 @@ type State' s a =
 -- | Provide a constructor for `State'` values
 --
 -- >>> runStateT (state' $ runState $ put 1) 0
--- ExactlyOne  ((),1)
+-- ExactlyOne ((),1)
 state' ::
   (s -> (a, s))
   -> State' s a
@@ -240,7 +240,7 @@ data OptionalT f a =
 instance Functor f => Functor (OptionalT f) where
   -- (<$>) =
     -- error "todo: Course.StateT (<$>)#instance (OptionalT f)"
-  (<$>) f ot = OptionalT $ (f <$>) <$> (runOptionalT ot)
+  (<$>) f ot = OptionalT $ (f <$>) <$> runOptionalT ot
 
 -- | Implement the `Applicative` instance for `OptionalT f` given a Monad f.
 --
@@ -267,8 +267,9 @@ instance Functor f => Functor (OptionalT f) where
 -- >>> runOptionalT $ OptionalT (Full (+1) :. Full (+2) :. Nil) <*> OptionalT (Full 1 :. Empty :. Nil)
 -- [Full 2,Empty,Full 3,Empty]
 instance Monad f => Applicative (OptionalT f) where
-  pure a = OptionalT $ return $ Full a
-  (<*>) = error "StateT#apply"
+  pure = OptionalT . pure . pure
+  -- (<*>) (OptionalT oab) (OptionalT oa) = OptionalT $ lift2 (<*>) oab oa
+  (<*>) oab oa = OptionalT $ lift2 (<*>) (runOptionalT oab) (runOptionalT oa)
 
 
 -- | Implement the `Monad` instance for `OptionalT f` given a Monad f.
@@ -358,9 +359,75 @@ distinctG ::
   (Integral a, Show a) =>
   List a
   -> Logger Chars (Optional (List a))
-distinctG =
-  error "todo: Course.StateT#distinctG"
-  -- evalT (filtering _pred la) S.empty
+distinctG la = runOptionalT $ evalT (filtering pred la) S.empty
+  where pred n = StateT $ \s
+                 -> OptionalT $ if n > 100
+                                then log1 ("aborting > 100: " ++ show' n) Empty
+                                else (if even n
+                                      then log1 ("even number: " ++ show' n)
+                                      else pure) $ Full (S.notMember n s, S.insert n s)
+
+-- let gt100 = n > 100
+--     isEven = even n
+--     seen = S.member n s
+--     newLog = if | gt100 -> (P.++) "aborting > 100: " (show n)
+--                 | isEven -> (P.++) "even number: " (show n)
+--                 | otherwise -> Nil
+--     -- newList = if | gt100 -> const Empty
+--     --              | seen -> id
+--     --              | otherwise -> ((listh [n] ++) <$>)
+-- in log1 newLog (if | gt100 -> Empty
+--                    | isEven -> Full $ (seen, S.insert n s)
+--                    | otherwise -> Full $ (seen, s))
+
+
+
+-- distinctG la = runOptionalT _todo
+
+  -- error "todo: Course.StateT#distinctG"
+  -- 1. when > 100  n > 100
+  -- log1 (listh $ "aborting > 100: " ++ show n) (const Empty)
+  -- 2. when not found and even,  not (S.member n s) && even n
+  -- log1 (listh $ "even number: " ++ show n) ((listh [n] ++) <$>)
+  -- 3. when not found and not even, not (S.member n s) && not (even n)
+  -- log1 Nil ((listh [n] ++) <$>)
+  -- 3. when found S.member n s
+  -- log1 Nil id
+
+  -- log1 Nil Empty
+  --   where (_v, _s) = runStateT _todo S.empty
+
+  -- runOptionalT :: OptionalT f a -> f (Optional a)
+  -- runOptionalT :: OptionalT (Logger Chars) (List a) -> Logger Chars (Optional (List a))
+
+  -- runStateT :: StateT s f a -> s -> f (a, s)
+
+  -- runStateT :: StateT (S.Set (List Chars)) (OptionalT (Logger Chars)) -> (S.Set (List Chars)) -> (Logger Chars) (
+
+
+  -- runStateT (trans :: StateT (S.Set (List Chars)) (Logger Chars) (Optional (List Int))) S.empty
+  -- where trans = undefined
+
+
+
+
+  -- where f n =
+  --  if | n > 100 -> log1 (listh $ "aborting > 100: " ++ show n) (const Empty)
+  --     | S.member n s -> log1 Nil id
+  --     | not (S.member n s) && even n -> log1 (listh $ "even number: " + show n) ((listh [n] ++) <$>)
+  --     | otherwise -> log1 Nil ((listh [n] ++) <$>)
+
+
+-- filtering :: Applicative f => (a -> f Bool) -> List a -> f (List a)
+
+-- StateT S (OptionalT List Int) (List Chars)
+-- OptionalT List Int
+
+-- distinct :: Ord a => List a -> List a
+-- distinct la = eval (filtering pred la) S.empty where pred a = State $ \s -> (not $ S.member a s, S.insert a s)
+-- newtype StateT s f a =  StateT {    runStateT ::      s      -> f (a, s)  }
+-- eval ::  State s a  -> s  -> a
+-- evalT ::  Functor f =>  StateT s f a  -> s  -> f a
 
 -- filtering ::  Applicative f =>  (a -> f Bool)  -> List a  -> f (List a)
 -- evalT ::  Functor f =>  StateT s f a  -> s  -> f a      ## s :: set, f :: Optional, a :: a
