@@ -91,8 +91,9 @@ instance Functor MaybeListZipper where
 toList ::
   ListZipper a
   -> List a
+
 toList (ListZipper l p r) =
-  error "todo: Course.ListZipper#toList"
+  -- error "todo: Course.ListZipper#toList"
   (reverse l) ++ (p :. Nil) ++ r
 
 -- | Convert the given (maybe) zipper back to a list.
@@ -116,8 +117,9 @@ toListZ (IsZ z) =
 fromList ::
   List a
   -> MaybeListZipper a
-fromList =
-  error "todo: Course.ListZipper#fromList"
+fromList Nil = IsNotZ
+fromList (x :. xs) = IsZ $ ListZipper Nil x xs
+  -- error "todo: Course.ListZipper#fromList"
 
 -- | Retrieve the `ListZipper` from the `MaybeListZipper` if there is one.
 --
@@ -127,8 +129,11 @@ fromList =
 toOptional ::
   MaybeListZipper a
   -> Optional (ListZipper a)
-toOptional =
-  error "todo: Course.ListZipper#toOptional"
+-- toOptional =
+--   error "todo: Course.ListZipper#toOptional"
+toOptional IsNotZ = Empty
+toOptional (IsZ z) = Full z
+
 
 zipper ::
   [a]
