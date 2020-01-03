@@ -771,7 +771,7 @@ instance Comonad ListZipper where
 -- >>> traverse id (zipper [Full 1, Full 2, Full 3] (Full 4) [Empty, Full 6, Full 7])
 -- Empty
 instance Traversable ListZipper where
-  traverse afb za = sequenceA (afb <$> za)
+  traverse afb (ListZipper l x r) = ListZipper <$> (sequenceA $ afb <$> l) <*> (afb x) <*> (sequenceA $ afb <$> r)
     -- error "todo: Course.ListZipper traverse#instance ListZipper"
 
 -- | Implement the `Traversable` instance for `MaybeListZipper`.
@@ -788,7 +788,7 @@ instance Traversable ListZipper where
 
 instance Traversable MaybeListZipper where
   traverse _ IsNotZ = pure IsNotZ
-  traverse afb (IsZ za) = sequenceA $ IsZ $ afb <$> za
+  traverse afb (IsZ za) = IsZ <$> traverse afb za
     -- error "todo: Course.ListZipper traverse#instance MaybeListZipper"
 
 -----------------------

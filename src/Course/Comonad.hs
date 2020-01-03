@@ -17,9 +17,10 @@ import Course.Functor
 --
 -- * The law of right identity
 --   `∀f. copure . (f <<=) == f
+-- $setup
+-- >>> import qualified Prelude as P
 
-
---   (<<=) ::    (f a -> b)   -> f a    -> f b
+-- (<<=) :: (f a -> b) -> f a -> f b
 
 class Extend f => Comonad f where
   copure ::
@@ -40,7 +41,7 @@ instance Comonad ExactlyOne where
 
 -- | Witness that all things with (<<=) and copure also have (<$>).
 --
--- >>> (+10) <$$> ExactlyOne 7
+-- >>> (P.+ 10) <$$> ExactlyOne 7
 -- ExactlyOne 17
 (<$$>) ::
   Comonad f =>
