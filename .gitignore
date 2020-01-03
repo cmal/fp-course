@@ -42,3 +42,12 @@ ops/*.retry
 
 # HSpec
 .hspec-failures
+
+# Mac
+.DS_Store
+
+# Emacs
+TODO.org
+
+# Stack
+stack.yaml.lock
