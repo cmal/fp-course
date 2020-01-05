@@ -597,14 +597,14 @@ phoneParser = digit >>=
 -- Result >< Person 123 "Fred" "Clarkson" True "123-456.789"
 personParser ::
   Parser Person
-personParser = ageParser >>=
-               (\pa -> pure (const pa) <*> spaces1) >>=
-               (\age -> pure (Person age) <*> firstNameParser) >>=
-               (\pa -> pure (const pa) <*> spaces1) >>=
-               (\pa -> pure (\fn -> pa fn) <*> surnameParser) >>=
-               (\pa -> pure (const pa) <*> spaces1) >>=
-               (\paf -> pure (\sn -> paf sn) <*> smokerParser) >>=
-               (\pa -> pure (const pa) <*> spaces1) >>=
+personParser = (ageParser <* spaces1) >>=
+               -- (\x -> pure (const x) <*> spaces1) >>=
+               (\age -> pure (Person age) <*> firstNameParser <* spaces1) >>=
+               -- (\x -> pure (const x) <*> spaces1) >>=
+               (\pa -> pure (\fn -> pa fn) <*> surnameParser <* spaces1) >>=
+               -- (\x -> pure (const x) <*> spaces1) >>=
+               (\paf -> pure (\sn -> paf sn) <*> smokerParser <* spaces1) >>=
+               -- (\x -> pure (const x) <*> spaces1) >>=
                (\pafs -> pure (\ph -> pafs ph) <*> phoneParser)
 -- error "todo: Course.Parser#personParser"
 
