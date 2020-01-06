@@ -439,9 +439,10 @@ thisMany n p = sequenceParser $ replicate n p
 -- True
 ageParser ::
   Parser Int
-ageParser =
-  (\k -> case read k of Empty  -> constantParser (UnexpectedString k)
-                        Full h -> pure h) =<< (list1 digit)
+ageParser = (list1 digit) >>=
+              (\k -> case read k of
+                     Empty  -> constantParser (UnexpectedString k)
+                     Full h -> pure h)
 
 -- | Write a parser for Person.firstName.
 -- /First Name: non-empty string that starts with a capital letter and is followed by zero or more lower-case letters/
@@ -597,13 +598,13 @@ phoneParser = digit >>=
 -- Result >< Person 123 "Fred" "Clarkson" True "123-456.789"
 personParser ::
   Parser Person
-personParser = (ageParser <* spaces1) >>=
+personParser = ageParser >>=~
                -- (\x -> pure (const x) <*> spaces1) >>=
-               (\age -> pure (Person age) <*> firstNameParser <* spaces1) >>=
+               (\age -> pure (Person age) <*> firstNameParser) >>=~
                -- (\x -> pure (const x) <*> spaces1) >>=
-               (\pa -> pure (\fn -> pa fn) <*> surnameParser <* spaces1) >>=
+               (\pa -> pure (\fn -> pa fn) <*> surnameParser) >>=~
                -- (\x -> pure (const x) <*> spaces1) >>=
-               (\paf -> pure (\sn -> paf sn) <*> smokerParser <* spaces1) >>=
+               (\paf -> pure (\sn -> paf sn) <*> smokerParser) >>=~
                -- (\x -> pure (const x) <*> spaces1) >>=
                (\pafs -> pure (\ph -> pafs ph) <*> phoneParser)
 -- error "todo: Course.Parser#personParser"

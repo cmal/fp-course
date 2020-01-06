@@ -63,6 +63,9 @@ tok p = p <* spaces
 -- >>> parse (charTok 'a') "abc"
 -- Result >bc< 'a'
 --
+-- >>> parse (charTok 'a') "a bc"
+-- Result >bc< 'a'
+--
 -- >>> isErrorResult (parse (charTok 'a') "dabc")
 -- True
 --
@@ -101,7 +104,7 @@ commaTok = is ','
 -- True
 quote ::
   Parser Char
-quote = is '"' ||| is '\''
+quote = is '\"' ||| is '\''
   -- error "todo: Course.MoreParser#quote"
 
 -- | Write a function that parses the given string (fails otherwise).
