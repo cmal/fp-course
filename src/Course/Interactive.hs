@@ -82,8 +82,11 @@ data Op =
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
 convertInteractive ::
   IO ()
-convertInteractive =
-  error "todo: Course.Interactive#convertInteractive"
+convertInteractive = do
+  -- error "todo: Course.Interactive#convertInteractive"
+  putStr $ listh "Input something and press ENTER, I will convert to upper-case: "
+  input <- getLine
+  putStrLn $ toUpper <$> input
 
 -- |
 --
@@ -110,8 +113,15 @@ convertInteractive =
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
 reverseInteractive ::
   IO ()
-reverseInteractive =
-  error "todo: Course.Interactive#reverseInteractive"
+reverseInteractive = do
+  -- error "todo: Course.Interactive#reverseInteractive"
+  putStr $ listh "Give me an existed filename to reverse, and press ENTER: "
+  fileR <- getLine
+  putStr $ listh "Give me the filename to write to, and press ENTER: "
+  fileW <- getLine
+  content <- reverse <$> readFile fileR
+  writeFile fileW content
+
 
 -- |
 --
@@ -136,8 +146,25 @@ reverseInteractive =
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
 encodeInteractive ::
   IO ()
-encodeInteractive =
-  error "todo: Course.Interactive#encodeInteractive"
+encodeInteractive = do
+  -- error "todo: Course.Interactive#encodeInteractive"
+  putStr $ listh "Give me a string and I will URL-encode it: "
+  input <- getLine
+  putStrLn $ encode input
+
+encode ::
+  Chars
+  -> Chars
+encode Nil = Nil
+encode (c:.cs) =
+  let table = (' ', "%20") :.
+              ('\t', "%09") :.
+              ('\"', "%22") :.
+              Nil
+  in case find ((==) c . fst) table of
+     Empty -> c:.encode cs
+     Full (_, x) -> x ++ encode cs
+
 
 interactive ::
   IO ()
