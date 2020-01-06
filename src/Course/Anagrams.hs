@@ -7,6 +7,7 @@ module Course.Anagrams where
 import Course.Core
 import Course.List
 import Course.Functor
+import qualified Prelude as P
 
 {-
 
@@ -32,13 +33,15 @@ anagrams ::
   Chars
   -> FilePath
   -> IO (List Chars)
-anagrams =
-  error "todo: Course.Anagrams#anagrams"
+anagrams cs p = do
+         content <- readFile p
+         P.return $ intersectBy (==) (permutations cs) (lines content)
+  -- error "todo: Course.Anagrams#anagrams"
 
 -- Compare two strings for equality, ignoring case
 equalIgnoringCase ::
   Chars
   -> Chars
   -> Bool
-equalIgnoringCase =
-  error "todo: Course.Anagrams#equalIgnoringCase"
+equalIgnoringCase a b = (toLower <$> a) == (toLower <$> b)
+  -- error "todo: Course.Anagrams#equalIgnoringCase"
