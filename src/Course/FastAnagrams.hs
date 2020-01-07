@@ -7,6 +7,7 @@ import Course.Core
 import Course.List
 import Course.Functor
 import qualified Data.Set as S
+import qualified Prelude as P
 
 -- Return all anagrams of the given string
 -- that appear in the given dictionary file.
@@ -14,8 +15,11 @@ fastAnagrams ::
   Chars
   -> FilePath
   -> IO (List Chars)
-fastAnagrams =
-  error "todo: Course.FastAnagrams#fastAnagrams"
+-- fastAnagrams =
+--   error "todo: Course.FastAnagrams#fastAnagrams"
+fastAnagrams cs p = do
+                    content <- readFile p
+                    P.return $ filter (flip S.member (S.fromList (hlist $ permutations cs))) (lines content)
 
 newtype NoCaseString =
   NoCaseString {
