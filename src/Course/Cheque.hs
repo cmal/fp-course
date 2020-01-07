@@ -25,6 +25,7 @@ import Course.List
 import Course.Functor
 import Course.Applicative
 import Course.Monad
+import Data.Char
 
 -- $setup
 -- >>> :set -XOverloadedStrings
@@ -220,6 +221,41 @@ data Digit3 =
   | D3 Digit Digit Digit
   deriving Eq
 
+show10 :: Digit -> Chars
+show10 Two = "twenty"
+show10 Three = "thirty"
+show10 Four = "forty"
+show10 Five = "fifty"
+show10 Six = "sixty"
+show10 Seven = "seventy"
+show10 Eight = "eighty"
+show10 Nine = "ninety"
+show10 _ = error "not implemented show10"
+
+showDigit2 :: Digit -> Digit -> Chars
+showDigit2 Zero d = showDigit d
+showDigit2 One Zero = "ten"
+showDigit2 One One = "eleven"
+showDigit2 One Two = "twelve"
+showDigit2 One Three = "thirteen"
+showDigit2 One Four = "fourteen"
+showDigit2 One Five = "fifteen"
+showDigit2 One Six = "sixteen"
+showDigit2 One Seven = "seventeen"
+showDigit2 One Eight = "eighteen"
+showDigit2 One Nine = "nineteen"
+showDigit2 t Zero = show10 t
+showDigit2 t x = show10 t ++ "-" ++ showDigit x
+
+showDigit3 :: Digit3 -> Chars
+showDigit3 (D1 Zero) = ""
+showDigit3 (D1 d) = showDigit d
+showDigit3 (D2 d1 d2) = showDigit2 d1 d2
+showDigit3 (D3 Zero d2 d3) = showDigit2 d2 d3
+showDigit3 (D3 d1 d2 d3) = showDigit d1 ++ " hundred" ++ go d2 d3
+                           where go Zero Zero = ""
+                                 go d2' d3' = " and " ++ showDigit2 d2' d3'
+
 -- Possibly convert a character to a digit.
 fromChar ::
   Char
@@ -246,6 +282,18 @@ fromChar '9' =
   Full Nine
 fromChar _ =
   Empty
+
+fromChar1 :: Char -> Digit
+fromChar1 '1' = One
+fromChar1 '2' = Two
+fromChar1 '3' = Three
+fromChar1 '4' = Four
+fromChar1 '5' = Five
+fromChar1 '6' = Six
+fromChar1 '7' = Seven
+fromChar1 '8' = Eight
+fromChar1 '9' = Nine
+fromChar1 '0' = Zero
 
 -- | Take a numeric value and produce its English output.
 --
@@ -323,5 +371,47 @@ fromChar _ =
 dollars ::
   Chars
   -> Chars
-dollars =
-  error "todo: Course.Cheque#dollars"
+dollars xs = intPart i ++ " dollar" ++ (if i == "1" then "" else "s") ++
+             " and " ++ digitPart dd ++ " cent" ++ (if dd == "01" then "" else "s")
+  where s = break (== '.') xs
+        i = filter isDigit $ fst s
+        d = filter isDigit $ snd s
+        dd = if length d == 1 then d ++ "0" else d
+  -- error "todo: Course.Cheque#dollars"
+
+
+intPart :: Chars -> Chars
+intPart Nil = "zero"
+intPart ('0':.xs) = intPart xs
+intPart xs = readDigits xs
+
+digitPart :: Chars -> Chars
+digitPart Nil = "zero"
+digitPart ('0':.Nil) = digitPart Nil
+digitPart xs = readDigits $ take 2 $ xs
+
+
+readDigits3 :: Chars -> Chars
+readDigits3 Nil = "zero"
+readDigits3 ('0':.xs) = readDigits3 xs
+readDigits3 (x:.Nil) = showDigit3 (D1 $ fromChar1 x)
+readDigits3 (x:.y:.Nil) = showDigit3 (D2 (fromChar1 x) (fromChar1 y))
+readDigits3 (x:.y:.z:.Nil) = showDigit3 (D3 (fromChar1 x) (fromChar1 y) (fromChar1 z))
+
+
+readDigits :: Chars -> Chars
+readDigits Nil = ""
+readDigits ys = go ys illion
+                 where go xs il =
+                         if take 3 xs == "000"
+                            then go (drop 3 xs) il
+                            else case d of
+                                 0 -> readDigits3 xs
+                                 _ -> readDigits3'' xs t d il ++
+                                      go (drop t xs) il
+                                 where d = max 0 $ div (length xs - 1) 3
+                                       t = length xs - d * 3
+                                       readDigits3'' xs t d il =
+                                         readDigits3 (take t xs) ++ " " ++
+                                         (headOr "" (drop d il)) ++
+                                         (if all (== '0') (drop t xs) then "" else " ")
